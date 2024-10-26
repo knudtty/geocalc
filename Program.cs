@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<GeoZoneContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("MvcMovieContext")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("GeoZoneContext"), b => b.UseNetTopologySuite()));
 
 var app = builder.Build();
 
