@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
-using geonet.Models;
+using Geocalc.Models;
 
-namespace geonet.Data
+namespace Geocalc.Data
 {
     public class GeoZoneContext : DbContext
     {

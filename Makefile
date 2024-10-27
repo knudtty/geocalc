@@ -9,6 +9,4 @@ docker.run:
 		geocalc 
 
 watch:
-	@set -o allexport; source .env; set +o allexport;
-	dotnet watch
-
+	@set -o allexport; source .env; set +o allexport; dotnet watch

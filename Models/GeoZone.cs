@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using NetTopologySuite.Geometries;
 
-namespace geonet.Models;
+namespace Geocalc.Models;
 
 [Table("GeoZone")]
 public class GeoZone

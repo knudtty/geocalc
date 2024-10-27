@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using geonet.Data;
-using geonet.Models;
+using Geocalc.Data;
+using Geocalc.Models;
 
-namespace geonet.Controllers
+namespace Geocalc.Controllers
 {
     public class GeozonesController : Controller
     {

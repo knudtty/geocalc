@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using geonet.Data;
-using geonet.Models;
+using Geocalc.Data;
+using Geocalc.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

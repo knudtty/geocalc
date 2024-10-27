@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
-using geonet.Data;
+using Geocalc.Data;
 
 #nullable disable
 
-namespace geonet.Migrations
+namespace Geocalc.Migrations
 {
     [DbContext(typeof(GeoZoneContext))]
     partial class GeoZoneContextModelSnapshot : ModelSnapshot
@@ -17,7 +17,7 @@ namespace geonet.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
 
-            modelBuilder.Entity("geonet.Models.GeoZone", b =>
+            modelBuilder.Entity("Geocalc.Models.GeoZone", b =>
                 {
                     b.Property<int>("GeoZoneID")
                         .ValueGeneratedOnAdd()

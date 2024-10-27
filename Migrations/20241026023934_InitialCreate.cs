@@ -3,7 +3,7 @@ using NetTopologySuite.Geometries;
 
 #nullable disable
 
-namespace geonet.Migrations
+namespace Geocalc.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

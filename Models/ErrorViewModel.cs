@@ -1,4 +1,4 @@
-namespace geonet.Models;
+namespace Geocalc.Models;
 
 public class ErrorViewModel
 {

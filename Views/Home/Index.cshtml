@@ -41,10 +41,12 @@
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     const SNAP_DISTANCE = 15;
+    const POINT_COLOR = "red";
+    const LINE_COLOR = "blue";
 
     function initMap() {
         map = new google.maps.Map(mapElem, {
-            center: { lat: 46.8772, lng: -96.7898 }, // Initial center, e.g., San Francisco
+            center: { lat: 46.8772, lng: -96.7898 }, // Initial center Fargo, ND
             zoom: 12,
         });
 
@@ -60,7 +62,7 @@
         // Event listener for mouse movements
         mapElem.addEventListener("mousemove", (event) => {
             if (measuring && points.length > 0) {
-                drawLines(event); // Your drawing function
+                drawLines(event);
             }
         });
 
@@ -81,7 +83,7 @@
     function addPoint(latLng) {
         if (points.length > 0 && isNearFirstPoint(latLng)) {
             latLng = points[0]; // Snap to the first point
-            measuring = false; // End measuring state
+            measuring = false;
             button.classList.remove('active'); // Deactivate button
         }
 
@@ -91,6 +93,8 @@
         if (points.length > 1) {
             drawLines();
         }
+
+        // This should only happen if measuring was just deactivated (on a snap)
         if (!measuring) {
             requestAcres();
         }
@@ -106,12 +110,11 @@
         return distance <= SNAP_DISTANCE;
     }
 
-    // Draw a custom point on the canvas
     function drawPoint(latLng) {
         const { x, y } = getCanvasCoordinates(latLng);
-        ctx.fillStyle = "red"; // Custom point color
+        ctx.fillStyle = POINT_COLOR;
         ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2); // Draw a circle
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
         ctx.fill();
     }
 
@@ -119,7 +122,6 @@
     function drawLines(event = null) {
         ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
 
-        // Draw lines between points
         ctx.beginPath();
         points.forEach((point, index) => {
             const { x, y } = getCanvasCoordinates(point);
@@ -145,7 +147,7 @@
             }
         }
 
-        ctx.strokeStyle = "blue"; // Line color
+        ctx.strokeStyle = LINE_COLOR;
         ctx.lineWidth = 2;
         ctx.stroke();
 
@@ -161,29 +163,28 @@
         }
     }
 
-    // Get canvas coordinates from LatLng
+    // Convert lat/lon into canvas coordinates
     function getCanvasCoordinates(latLng) {
         const bounds = map.getBounds();
-        const ne = bounds.getNorthEast(); // Northeast corner
-        const sw = bounds.getSouthWest(); // Southwest corner
+        const ne = bounds.getNorthEast(); // top left
+        const sw = bounds.getSouthWest(); // bottom right
         var x = mapNum(latLng.lng(), ne.lng(), sw.lng(), 0, canvas.width);
         var y = canvas.height - mapNum(latLng.lat(), ne.lat(), sw.lat(), 0, canvas.height);
         return { x, y };
     }
 
     function requestAcres() {
-        console.log(points);
+        // construct acres request
         var params = new URLSearchParams();
         points.forEach((point) => {
             params.append("lat", point.lat());
-            console.log("lat", point.lat())
         });
         points.forEach((point) => {
             params.append("lon", point.lng());
-            console.log("lon", point.lng())
         });
         var url = `/api/acreage/calculate?${params.toString()}`;
 
+        // perform request
         const xhttp = new XMLHttpRequest();
         xhttp.onload = function() {
             if (this.status != 200) {

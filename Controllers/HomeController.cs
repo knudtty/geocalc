@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using geonet.Models;
+using Geocalc.Models;
 
-namespace geonet.Controllers;
+namespace Geocalc.Controllers;
 
 public class HomeController : Controller
 {
