@@ -3,6 +3,208 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Calculate Acreage</h1>
 </div>
+
+<style>
+    #map {
+        height: 500px;
+        width: 100%;
+        position: relative;
+    }
+    #canvas {
+        position: absolute;
+        pointer-events: none; /* Allow clicks to pass through to the map */
+        z-index: 1; /* Ensure canvas is above the map */
+    }
+    #measureButton {
+        margin: 10px 0;
+    }
+    .btn.active {
+      background-color: #28a745;
+    }
+</style>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArkgGIXRXsYaMCmY0P-JFYiYbW7fbLJck&callback=initMap" async defer></script>
+<button id="measureButton" class="btn btn-primary">Measure</button>
+<div id="acres">Try measuring an area</div>
+<div id="map"></div>
+<canvas id="canvas"></canvas>
+
+<script>
+    let map;
+    let points = [];
+    let measuring = false;
+    const mapElem = document.getElementById("map");
+    const acresElem = document.getElementById("acres");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const SNAP_DISTANCE = 15;
+
+    function initMap() {
+        map = new google.maps.Map(mapElem, {
+            center: { lat: 46.8772, lng: -96.7898 }, // Initial center, e.g., San Francisco
+            zoom: 12,
+        });
+
+        updateCanvasPosition(); // Set initial canvas position and size
+
+        // Event listener for map clicks
+        map.addListener("click", (event) => {
+            if (measuring) {
+                addPoint(event.latLng);
+            }
+        });
+
+        // Event listener for mouse movements
+        mapElem.addEventListener("mousemove", (event) => {
+            if (measuring && points.length > 0) {
+                drawLines(event); // Your drawing function
+            }
+        });
+
+        // Update canvas position on resize or scroll
+        window.addEventListener('resize', updateCanvasPosition);
+        window.addEventListener('scroll', updateCanvasPosition);
+    }
+
+    function updateCanvasPosition() {
+        const mapRect = document.getElementById("map").getBoundingClientRect();
+        canvas.style.top = mapRect.top + window.scrollY + "px";
+        canvas.style.left = mapRect.left + window.scrollX + "px";
+        canvas.width = mapRect.width;
+        canvas.height = mapRect.height;
+    }
+
+    // Add a custom point and draw it on the canvas
+    function addPoint(latLng) {
+        if (points.length > 0 && isNearFirstPoint(latLng)) {
+            latLng = points[0]; // Snap to the first point
+            measuring = false; // End measuring state
+            button.classList.remove('active'); // Deactivate button
+        }
+
+        points.push(latLng);
+        drawPoint(latLng); // Draw the custom point
+
+        if (points.length > 1) {
+            drawLines();
+        }
+        if (!measuring) {
+            requestAcres();
+        }
+    }
+
+    function isNearFirstPoint(latLng) {
+        const firstPoint = points[0];
+        const { x: x1, y: y1 } = getCanvasCoordinates(firstPoint);
+        const { x: x2, y: y2 } = getCanvasCoordinates(latLng);
+
+        // Calculate the distance
+        const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+        return distance <= SNAP_DISTANCE;
+    }
+
+    // Draw a custom point on the canvas
+    function drawPoint(latLng) {
+        const { x, y } = getCanvasCoordinates(latLng);
+        ctx.fillStyle = "red"; // Custom point color
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2); // Draw a circle
+        ctx.fill();
+    }
+
+    // Draw lines between points
+    function drawLines(event = null) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+
+        // Draw lines between points
+        ctx.beginPath();
+        points.forEach((point, index) => {
+            const { x, y } = getCanvasCoordinates(point);
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        });
+
+        // Draw line to mouse cursor
+        if (event) {
+            const firstPointCanvas = getCanvasCoordinates(points[0]);
+            const distance = Math.sqrt(
+                (event.layerX - firstPointCanvas.x) ** 2 +
+                (event.layerY - firstPointCanvas.y) ** 2
+            );
+
+            if (distance <= SNAP_DISTANCE) {
+                ctx.lineTo(firstPointCanvas.x, firstPointCanvas.y); // Snap to first point
+            } else {
+                ctx.lineTo(event.layerX, event.layerY); // Follow mouse cursor
+            }
+        }
+
+        ctx.strokeStyle = "blue"; // Line color
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Draw the points again to keep them visible
+        points.forEach(point => drawPoint(point));
+    }
+
+    function mapNum(x, x1, x2, y1, y2) {
+        if (x2 >= x1) {
+            return y1+Math.abs((y2-y1)*(x-x1)/(x2-x1));
+        } else {
+            return y1+Math.abs((y2-y1)*(x-x2)/(x1-x2));
+        }
+    }
+
+    // Get canvas coordinates from LatLng
+    function getCanvasCoordinates(latLng) {
+        const bounds = map.getBounds();
+        const ne = bounds.getNorthEast(); // Northeast corner
+        const sw = bounds.getSouthWest(); // Southwest corner
+        var x = mapNum(latLng.lng(), ne.lng(), sw.lng(), 0, canvas.width);
+        var y = canvas.height - mapNum(latLng.lat(), ne.lat(), sw.lat(), 0, canvas.height);
+        return { x, y };
+    }
+
+    function requestAcres() {
+        console.log(points);
+        var params = new URLSearchParams();
+        points.forEach((point) => {
+            params.append("lat", point.lat());
+            console.log("lat", point.lat())
+        });
+        points.forEach((point) => {
+            params.append("lon", point.lng());
+            console.log("lon", point.lng())
+        });
+        var url = `/api/acreage/calculate?${params.toString()}`;
+
+        const xhttp = new XMLHttpRequest();
+        xhttp.onload = function() {
+            if (this.status != 200) {
+                acresElem.innerText = "Server error when requesting area";
+                return;
+            } 
+            const resp = JSON.parse(this.response);
+
+            acresElem.innerText = `The selected area is ${resp.acres.toFixed(2)} acres`;
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+
+    // Measure button functionality
+    const button = document.getElementById("measureButton");
+    button.addEventListener("click", () => {
+        measuring = !measuring;
+        button.classList.toggle('active');
+        if (measuring) {
+            points = []; // Reset points
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+        }
+    });
+</script>
