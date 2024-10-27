@@ -1,5 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    var googleMapsApiKey = Environment.GetEnvironmentVariable("GOOGLE_MAPS_API_KEY");
 }
 
 <div class="text-center">
@@ -25,7 +26,7 @@
     }
 </style>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArkgGIXRXsYaMCmY0P-JFYiYbW7fbLJck&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=@googleMapsApiKey&callback=initMap" async defer></script>
 <button id="measureButton" class="btn btn-primary">Measure</button>
 <div id="acres">Try measuring an area</div>
 <div id="map"></div>
