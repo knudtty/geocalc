@@ -193,7 +193,7 @@
             } 
             const resp = JSON.parse(this.response);
 
-            acresElem.innerText = `The selected area is ${resp.acres.toFixed(2)} acres`;
+            acresElem.innerHTML = `The selected area is <b>${resp.acres.toFixed(2)} acres</b>`;
         };
         xhttp.open("GET", url, true);
         xhttp.send();
